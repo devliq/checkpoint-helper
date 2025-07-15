@@ -362,6 +362,7 @@
       <div class="bungie-name" style="margin-bottom: 0;">
         <label for="bungiename">Bungie Name:</label>
         <div class="input-group">
+
           <input
             type="text"
             id="bungiename"
@@ -378,7 +379,47 @@
           </div>
         </div>
       </div>
+    <!-- Activity Type Buttons -->
+    <div class="section">
+      <div class="section-title">Activity Type</div>
+      <div id="activityTypeButtons" class="flex-parent"></div>
+    </div>
 
+    <!-- Activity Buttons -->
+    <div class="section">
+      <div class="section-title">Activity</div>
+      <div id="activityButtons" class="flex-parent"></div>
+    </div>
+
+    <!-- Difficulty Buttons -->
+    <div class="section">
+      <div class="section-title">Difficulty</div>
+      <div class="flex-parent">
+        <button id="difficultyNormalbutton" class="difficulty" aria-pressed="true" type="button">Normal</button>
+        <button id="difficultyMasterbutton" class="difficulty" aria-pressed="false" type="button">Master</button>
+      </div>
+    </div>
+
+    <!-- Encounter Buttons -->
+    <div class="section">
+      <div class="section-title">Encounter</div>
+      <div id="encounterButtons" class="flex-parent"></div>
+      <div id="botIndicator" style="margin-top:10px;text-align:center;"></div>
+    </div>
+
+    <!-- Queue Command Output -->
+    <div class="queue-section">
+      <div id="queueString" class="queue-output" tabindex="0" aria-live="polite">!queue</div>
+      <br />
+      <button id="copyButton" class="copy-btn" type="button" disabled>Copy to Clipboard</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- JavaScript moved here for proper rendering -->
+  <script>
 // Returns array of bot names that support the given activity/encounter
 function getBotSupport(activityName, encounterName) {
   if (!activityName || !encounterName) return [];
@@ -397,6 +438,9 @@ function getBotSupport(activityName, encounterName) {
     });
   }).map(bot => bot.bot);
 }
+// ...existing JavaScript code from previous script blocks goes here...
+// (Move all JS code from the previous script block here, after this function)
+  </script>
 
   // Enhanced activity data with better organization
   // Add 🗝️ emoji to all chest checkpoints
