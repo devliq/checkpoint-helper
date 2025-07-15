@@ -45,6 +45,7 @@
     border: none;
     color: white;
     user-select: none;
+    transition: background-color 0.2s, box-shadow 0.2s;
   }
   button.activitytype {
     background-color: #b83232; /* red-ish */
@@ -62,7 +63,6 @@
     flex: 1 1 120px;
     max-width: 250px;
     margin-bottom: 6px;
-    display: none;
   }
   button.difficulty {
     background-color: purple;
@@ -139,13 +139,13 @@
 
   <div class="container">
     <div class="column">
-      <p class="typeText" id="activityLabel">Activity:</p>
+      <p class="typeText">Activity:</p>
       <div id="activityButtons" class="flex-parent" style="flex-direction: column;">
         <!-- Activity buttons injected here -->
       </div>
     </div>
     <div class="column">
-      <p class="typeText" id="encounterLabel">Encounter:</p>
+      <p class="typeText">Encounter:</p>
       <div id="encounterButtons" class="flex-parent" style="flex-direction: column;">
         <!-- Encounter buttons injected here -->
       </div>
@@ -163,7 +163,7 @@
   </div>
 
 <script>
-  // Data: Activities sorted by age (oldest to newest)
+  // Activities sorted oldest → newest
   const activityData = {
     raids: {
       displayName: "Raids",
@@ -414,21 +414,24 @@
     },
   };
 
-  // State
+  // State variables
   let selectedActivityType = null;
   let selectedActivity = null;
   let selectedEncounter = null;
   let isMasterDifficulty = false;
 
-  // Elements
+  // DOM elements
   const activityTypeContainer = document.getElementById("activityTypeButtons");
   const activityContainer = document.getElementById("activityButtons");
   const encounterContainer = document.getElementById("encounterButtons");
   const queueStringEl = document.getElementById("queueString");
   const bungieNameInput = document.getElementById("bungiename");
+  const difficultyNormalBtn = document.getElementById("difficultyNormalbutton");
+  const difficultyMasterBtn = document.getElementById("difficultyMasterbutton");
 
-  // Create Activity Type Buttons
+  // Create activity type buttons
   function createActivityTypeButtons() {
+    activityTypeContainer.innerHTML = "";
     for (const typeKey in activityData) {
       const btn = document.createElement("button");
       btn.textContent = activityData[typeKey].displayName;
@@ -440,29 +443,25 @@
     }
   }
 
-  // Select Activity Type
+  // Select activity type
   function selectActivityType(typeKey) {
-    if (selectedActivityType === typeKey) return; // No change
+    if (selectedActivityType === typeKey) return;
 
     selectedActivityType = typeKey;
     selectedActivity = null;
     selectedEncounter = null;
     isMasterDifficulty = false;
-    updateDifficultyButtons(false);
 
-    // Highlight selected activity type button
     highlightButtons(activityTypeContainer, `activitytype-${typeKey}`);
 
-    // Render activities
     renderActivities(typeKey);
-
-    // Clear encounters container
     encounterContainer.innerHTML = "";
 
+    updateDifficultyButtons(false);
     updateQueueString();
   }
 
-  // Render Activities for chosen activity type
+  // Render activity buttons for selected type
   function renderActivities(typeKey) {
     activityContainer.innerHTML = "";
     const activities = activityData[typeKey].activities;
@@ -478,27 +477,23 @@
     }
   }
 
-  // Select Activity
+  // Select an activity
   function selectActivity(activityName) {
-    if (selectedActivity === activityName) return; // No change
+    if (selectedActivity === activityName) return;
 
     selectedActivity = activityName;
     selectedEncounter = null;
+    isMasterDifficulty = false;
 
-    // Highlight selected activity button
     highlightButtons(activityContainer, `activity-${activityName.replace(/\s+/g, "-").toLowerCase()}`);
 
-    // Render encounters for this activity
     renderEncounters(selectedActivityType, activityName);
 
-    // Reset difficulty to Normal on activity change
-    isMasterDifficulty = false;
     updateDifficultyButtons(false);
-
     updateQueueString();
   }
 
-  // Render Encounters for chosen activity
+  // Render encounters for selected activity
   function renderEncounters(typeKey, activityName) {
     encounterContainer.innerHTML = "";
     const activity = activityData[typeKey].activities[activityName];
@@ -510,70 +505,62 @@
       btn.classList.add("encounter");
       btn.type = "button";
       btn.id = `encounter-${idx}`;
-
       btn.onclick = () => selectEncounter(idx);
       encounterContainer.appendChild(btn);
-      btn.style.display = "block";
     });
 
-    // Auto-select first encounter
+    // Auto-select first encounter if exists
     if (activity.encounters.length > 0) {
       selectEncounter(0);
     }
   }
 
-  // Select Encounter
+  // Select an encounter
   function selectEncounter(encounterIdx) {
+    if (selectedEncounter === encounterIdx) return;
+
     selectedEncounter = encounterIdx;
-    // Highlight selected encounter button
     highlightButtons(encounterContainer, `encounter-${encounterIdx}`);
     updateQueueString();
   }
 
-  // Highlight one button among siblings
+  // Highlight only one button by id within container
   function highlightButtons(container, selectedId) {
-    [...container.children].forEach((btn) => {
+    Array.from(container.children).forEach((btn) => {
       btn.classList.toggle("highlighted", btn.id === selectedId);
     });
   }
 
-  // Difficulty Buttons handling
+  // Select difficulty and update highlight and enable/disable master button
   function selectDifficulty(masterSelected) {
     isMasterDifficulty = masterSelected;
     updateDifficultyButtons(masterSelected);
     updateQueueString();
   }
 
-  // Update difficulty buttons' styles and disabled state
+  // Update difficulty button styles and disabled state
   function updateDifficultyButtons(masterSelected) {
-    const normalBtn = document.getElementById("difficultyNormalbutton");
-    const masterBtn = document.getElementById("difficultyMasterbutton");
+    difficultyNormalBtn.classList.toggle("highlighted", !masterSelected);
+    difficultyMasterBtn.classList.toggle("highlighted", masterSelected);
 
-    // Highlight selection
-    normalBtn.classList.toggle("highlighted", !masterSelected);
-    masterBtn.classList.toggle("highlighted", masterSelected);
-
-    // Disable master button if difficulty not allowed for activity
     if (selectedActivityType && selectedActivity) {
-      const diffEnabled = activityData[selectedActivityType].activities[selectedActivity].difficultyEnabled;
-      masterBtn.disabled = !diffEnabled;
-      if (!diffEnabled) {
-        // If master is disabled and was selected, reset to normal
-        if (isMasterDifficulty) {
-          isMasterDifficulty = false;
-          normalBtn.classList.add("highlighted");
-          masterBtn.classList.remove("highlighted");
-        }
+      const difficultyAllowed = activityData[selectedActivityType].activities[selectedActivity].difficultyEnabled;
+      difficultyMasterBtn.disabled = !difficultyAllowed;
+      if (!difficultyAllowed && masterSelected) {
+        // Reset to normal if master is not allowed
+        isMasterDifficulty = false;
+        difficultyNormalBtn.classList.add("highlighted");
+        difficultyMasterBtn.classList.remove("highlighted");
       }
     } else {
-      masterBtn.disabled = true;
+      difficultyMasterBtn.disabled = true;
     }
   }
 
-  // Validate Bungie name format
+  // Bungie name validation
   function validateBungieName() {
     const val = bungieNameInput.value.trim();
-    const regex = /^.{3,32}#\d{4}$/; // Basic check: 3-32 chars + # + 4 digits
+    const regex = /^.{3,32}#\d{4}$/;
     if (!regex.test(val)) {
       bungieNameInput.style.borderColor = "red";
     } else {
@@ -582,25 +569,26 @@
     updateQueueString();
   }
 
-  // Generate the queue string based on current selections
+  // Generate queue string
   function updateQueueString() {
-    if (!selectedActivityType || !selectedActivity || selectedEncounter === null) {
+    if (
+      !selectedActivityType ||
+      !selectedActivity ||
+      selectedEncounter === null ||
+      !bungieNameInput.value.trim() ||
+      bungieNameInput.style.borderColor === "red"
+    ) {
       queueStringEl.textContent = "!queue";
       return;
     }
+
     const bungieName = bungieNameInput.value.trim();
-    if (!bungieName) {
-      queueStringEl.textContent = "!queue";
-      return;
-    }
-
-    const actData = activityData[selectedActivityType].activities[selectedActivity];
+    const activityInfo = activityData[selectedActivityType].activities[selectedActivity];
     const difficultyCode = isMasterDifficulty ? "m" : "n";
-    const encounterCode = selectedEncounter + 1; // 1-based index
+    const encounterNum = selectedEncounter + 1;
 
-    // Format: !queue <bungieName> <activityCode> <encounterNumber> <difficulty>
-    const queueString = `!queue ${bungieName} ${actData.code} ${encounterCode} ${difficultyCode}`;
-    queueStringEl.textContent = queueString;
+    const queueStr = `!queue ${bungieName} ${activityInfo.code} ${encounterNum} ${difficultyCode}`;
+    queueStringEl.textContent = queueStr;
   }
 
   // Copy queue string to clipboard
@@ -608,26 +596,24 @@
     try {
       await navigator.clipboard.writeText(queueStringEl.textContent);
       alert("Copied to clipboard!");
-    } catch (err) {
+    } catch {
       alert("Failed to copy!");
     }
   }
 
-  // Initialize buttons on page load
+  // Initialize on page load
   function init() {
     createActivityTypeButtons();
 
     // Select first activity type by default
     const firstType = Object.keys(activityData)[0];
-    if (firstType) {
-      selectActivityType(firstType);
-    }
+    if (firstType) selectActivityType(firstType);
 
-    // Select Normal difficulty by default
+    // Default difficulty to Normal
     selectDifficulty(false);
   }
 
-  // Start the app
+  // Start app
   init();
 </script>
 </body>
