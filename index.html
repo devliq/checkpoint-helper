@@ -405,20 +405,7 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Difficulty</div>
-      <div class="flex-parent" id="difficultyButtons" role="group" aria-label="Difficulty Selection">
-        <button id="difficultyNormalbutton" class="difficulty" type="button" aria-pressed="true">Normal</button>
-        <button id="difficultyMasterbutton" class="difficulty" type="button" aria-pressed="false">Master</button>
-      </div>
-    </div>
-
-    <div class="queue-section">
-      <div class="section-title">Queue Command</div>
-      <div id="queueString" class="queue-output" tabindex="0" aria-live="polite">!queue</div>
-      <br>
-      <button class="copy-btn" type="button" id="copyButton" aria-label="Copy queue command to clipboard">Copy to Clipboard</button>
-    </div>
+    <!-- Removed duplicate Difficulty and Queue Command sections -->
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard!</div>
@@ -916,6 +903,10 @@
       state.selectedEncounter = encounterIdx;
       ui.highlightButton(elements.encounterContainer, utils.generateId("encounter", encounterIdx.toString()));
       ui.updateQueueOutput();
+      // Automatically copy queue command to clipboard and show notification
+      if (state.isComplete()) {
+        queueManager.copyToClipboard();
+      }
     },
 
     clear() {
