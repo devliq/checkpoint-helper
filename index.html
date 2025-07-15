@@ -126,15 +126,17 @@
   button {
     border-radius: 8px;
     cursor: pointer;
-    padding: 12px 20px;
+    padding: 6px 12px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: clamp(0.85rem, 2vw, 1rem);
     border: none;
     color: white;
     user-select: none;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    min-width: 80px;
+    line-height: 1.2;
   }
 
   button::before {
@@ -157,8 +159,8 @@
 
   button.activitytype {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
-    flex: 1 1 120px;
-    max-width: 200px;
+    flex: 1 1 80px;
+    max-width: 120px;
     box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
   }
 
@@ -169,9 +171,9 @@
 
   button.activity, button.encounter {
     background: linear-gradient(135deg, #2c3e50, #34495e);
-    flex: 1 1 120px;
-    max-width: 300px;
-    margin-bottom: 8px;
+    flex: 1 1 100px;
+    max-width: 180px;
+    margin-bottom: 6px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
 
@@ -182,8 +184,8 @@
 
   button.difficulty {
     background: linear-gradient(135deg, #8e44ad, #9b59b6);
-    flex: 1 1 120px;
-    max-width: 180px;
+    flex: 1 1 80px;
+    max-width: 120px;
     box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
   }
 
@@ -293,22 +295,34 @@
       grid-template-columns: 1fr;
       gap: 20px;
     }
-    
     h1 {
       font-size: 2rem;
     }
-    
     .flex-parent {
-      gap: 8px;
+      gap: 6px;
     }
-    
     button {
-      padding: 10px 16px;
-      font-size: 0.9rem;
+      padding: 5px 10px;
+      font-size: 0.85rem;
+      min-width: 60px;
     }
-    
     input#bungiename {
-      width: 200px;
+      width: 160px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+    .queue-output {
+      min-width: 120px;
+      font-size: 0.95rem;
+    }
+    button {
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      min-width: 48px;
     }
   }
 
