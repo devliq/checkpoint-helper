@@ -6,9 +6,6 @@
 <title>Twitch Checkpoint Bot Queue Helper</title>
 <style>
   body {
-    background-image: url(https://drive.google.com/thumbnail?authuser=0&sz=w1500&id=1ZPVU1KYPWhEBInb2f_wiTxChUlaDbjBc);
-    background-size: cover;
-    background-repeat: no-repeat;
     color: white;
     font-family: Arial, sans-serif;
     margin: 0;
@@ -127,6 +124,7 @@
       type="text"
       id="bungiename"
       placeholder="bungiename#0000"
+      value="fossagenie#9155"
       oninput="validateBungieName()"
       autocomplete="off"
       spellcheck="false"
@@ -378,7 +376,21 @@
     other: {
       displayName: "Stories/Other",
       activities: {
-        Shared Wisdom: {
+        "Lightfall": {
+          code: "lf",
+          encounters: [
+            "1: First Contact",
+            "2: Under Siege",
+            "3: Downfall",
+            "4: Breakneck",
+            "5: On The Verge",
+            "6: No Time Left",
+            "7: Headlong",
+            "8: Desperate Measures",
+          ],
+          difficultyEnabled: true,
+        },
+        "Shared Wisdom": {
           code: "sw",
           encounters: ["1: The Helm"],
           difficultyEnabled: false,
@@ -393,20 +405,6 @@
             "5: Ascent",
             "6: Dissent",
             "7: Iconoclasm",
-          ],
-          difficultyEnabled: true,
-        },
-        Lightfall: {
-          code: "lf",
-          encounters: [
-            "1: First Contact",
-            "2: Under Siege",
-            "3: Downfall",
-            "4: Breakneck",
-            "5: On The Verge",
-            "6: No Time Left",
-            "7: Headlong",
-            "8: Desperate Measures",
           ],
           difficultyEnabled: true,
         },
