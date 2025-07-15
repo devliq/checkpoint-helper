@@ -16,3 +16,119 @@ _site/
 # counterproductive to check this file into the repository.
 # Details at https://github.com/github/pages-gem/issues/768
 Gemfile.lock
+# Compiled source #
+###################
+*.com
+*.class
+
+# Cache and build output
+.cache/
+.sass-cache/
+
+*.dll
+*.exe
+*.o
+*.so
+.parcel-cache/
+.eslintcache
+
+.cache/
+.sass-cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.npm/
+.yarn/
+.pnp.*
+.cypress/
+.turbo/
+.next/
+.vercel/
+.firebase/
+
+# Editor/project files
+.nuxt/
+.vercel/
+.firebase/
+.idea/
+
+# Temp files
+.tmp/
+.stylelintcache
+.npm/
+.yarn/
+.pnp.*
+
+# Temp files
+.tmp/
+
+# Backup and swap files
+*~
+
+# Node.js
+node_modules/
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
+*.orig
+# Backup and swap files
+*~
+*.swp
+*.bak
+*.orig
+
+# Logs and databases
+
+*.log
+*.pid
+*.seed
+*.pid.lock
+*.sql
+*.sqlite
+*.sql
+*.sqlite
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.cypress/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+
+# Environment files
+.env
+.env.*
+
+# Coverage and test output
+.coverage
+coverage/
+test/tmp/
+test/output/
