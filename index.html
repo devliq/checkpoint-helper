@@ -1,143 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <title>Checkpoint Bot Queue Helper</title>
   <style>
     body {
-      background: url('https://drive.google.com/uc?id=1ZPVU1KYPWhEBInb2f_wiTxChUlaDbjBc') center/cover no-repeat;
-      color: white; font-family: sans-serif; padding: 1em;
+      background: #111 url('https://drive.google.com/uc?id=1ZPVU1KYPWhEBInb2f_wiTxChUlaDbjBc') center/cover no-repeat;
+      color: #fff; font-family: Arial, sans-serif; padding: 1em;
     }
-    h1 { text-align: center; }
+    h1, h3 { text-align: center; }
     .center { text-align: center; }
-    .button { padding: 0.75em 1.2em; margin: 0.4em; border: none; border-radius: 8px; cursor: pointer; }
-    .activitytype { background: crimson; }
-    .difficulty { background: purple; }
-    .activity, .encounter { display: block; background: black; padding: 0.6em; margin: 0.4em 0; border-radius: 6px; width: 100%; }
-    #botTips p { background: #222; padding: 0.8em; border-radius: 6px; margin: 0.6em 0; }
-    #botTips button { background: green; margin-top: 0.4em; }
+    .button {
+      background: #333; color: #fff; border: none; padding: 0.6em 1em;
+      margin: 0.3em; border-radius: 6px; cursor: pointer;
+    }
+    .button:hover { background: #555; }
+    .activity, .encounter {
+      display: block; background: #222; margin: 0.3em auto;
+      width: 90%; padding: 0.5em; border-radius: 5px; cursor: pointer;
+    }
+    #botSuggestions p {
+      background: #222; margin: 0.3em; padding: 0.5em;
+      border-radius: 5px;
+    }
+    #botSuggestions button {
+      margin-left: 0.5em; background: #4CAF50; border: none; padding: 0.2em 0.5em; border-radius: 4px; color: white;
+    }
   </style>
 </head>
 <body>
   <h1>Checkpoint Bot Queue Helper</h1>
-  <div class="center">
-    Bungie Name: <input id="bungiename" value="fossagenie#9155" onkeyup="validateName()"/>
-  </div>
 
   <div class="center">
-    <button class="button activitytype" onclick="setCategory('raids')">Raids</button>
-    <button class="button activitytype" onclick="setCategory('dungeons')">Dungeons</button>
-    <button class="button activitytype" onclick="setCategory('stories')">Stories/Other</button>
+    Bungie Name: <input id="bungiename" value="fossagenie#9155" onkeyup="updateName()" />
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1em; margin-top:1em;">
-    <div id="activCol"></div>
-    <div>
-      <div id="encCol"><p>Encounters:</p></div>
-      <div class="center">
-        <button class="button difficulty" onclick="setDifficulty('n')">Normal</button>
-        <button class="button difficulty" onclick="setDifficulty('m')">Master</button>
-      </div>
-    </div>
+  <div class="center">
+    <button class="button" onclick="setCategory('raids')">Raids</button>
+    <button class="button" onclick="setCategory('dungeons')">Dungeons</button>
+    <button class="button" onclick="setCategory('stories')">Stories/Other</button>
   </div>
 
+  <div id="activities" class="center"></div>
+  <div id="encounters" class="center"></div>
   <div class="center" style="margin-top:1em;">
-    <p id="mainQueue">!queue</p><br/>
+    <p id="mainQueue">!queue</p>
     <button class="button" onclick="copyText('mainQueue')">Copy Main</button>
   </div>
-
-  <div id="botTips" style="max-width:600px; margin:auto; margin-top:1.5em;">
-    <h3>Bot Suggestions:</h3>
-  </div>
+  <div id="botSuggestions" style="margin-top:1em;"></div>
 
 <script>
-  const activities = {
+  const data = {
     raids: {
-      "Root of Nightmares": ['Cataclysm','Chest 1','Scission','Chest 2','Macrocosm','Nezarec']
-      // add others similarly...
+      "Duality": ['Chest1','Chest2','Boss','1(M)','2(M)','Boss(M)'],
+      "Root of Nightmares": ['Chest1','Chest2','Nezarec','Scission(M)','Explicator(M)','Nezarec(M)'],
+      "Vault of Glass": ['Confluxes','Post-Templar','Atheon'],
+      "Deep Stone Crypt": ['Atraks-1','Chest2','Taniks'],
+      "Garden of Salvation": ['Chest1','Sanctified'],
+      "Vow of the Disciple": ['Chest1','Chest2'],
+      "Last Wish": ['Shuro-Chi','Morgeth']
     },
     dungeons: {
-      "Ghosts of the Deep": ['Ritual','Chest 1','Ecthar','Simmumah']
-      // etc.
+      "Ghosts of the Deep": ['Chest1','Chest2','Boss'],
+      "Prophecy": ['1','2','Boss'],
+      "Shattered Throne": ['Boss'],
+      "Pit of Heresy": ['Boss'],
+      "Grasp of Avarice": ['Boss'],
+      "Spire of the Watcher": ['1','2','Boss']
     },
     stories: {
-      "The Final Shape": ['Transmigration','Temptation','Exegesis','Requiem','Ascent','Dissent','Iconoclasm']
-      // add more if needed
+      "Final Shape": ['Ascent','Dissent','Iconoclasm','Transmigration(M)','Temptation(M)','Exegesis(M)','Requiem(M)','Ascent(M)','Dissent(M)','Iconoclasm(M)'],
+      "Lightfall": ['First Contact(M)','Under Siege(M)','Breakneck(M)','Desperate Measures(M)'],
+      "Witch Queen": ['Arrival(M)','Investigation(M)','Ghosts(M)','Communion(M)','Mirror(M)','Cunning(M)','Last Chance(M)','Ritual(M)']
     }
   };
 
-  let category = "", activity = "", encounter = "", diff = "n", bungiename = document.getElementById('bungiename').value;
-  const bots = ['Discord','TCT','LB9','GDB','D2Checkpoints','D2Chests','DestinyCheckpoints'];
+  const botCheckpoints = {
+    "Discord": data,
+    "TCT": data,
+    "LB9": data,
+    "GDB": data,
+    "D2Checkpoints": data,
+    "D2Chests": data,
+    "DestinyCheckpoints": data
+  };
 
-  function validateName(){
-    const val = document.getElementById('bungiename').value;
-    if(/^.+#\d{4}$/.test(val)) bungiename = val;
-    updateAll();
+  let selected = { category: "", activity: "", encounter: "", bungie: "Guardian#1234" };
+
+  function updateName() {
+    selected.bungie = document.getElementById('bungiename').value;
+    updateMainQueue();
   }
 
-  function setCategory(c){
-    category = c;
-    const col = document.getElementById('activCol');
-    col.innerHTML = '<p>Select Activity:</p>';
-    for(let a in activities[c]){
-      const btn = document.createElement('button');
-      btn.className = 'activity';
-      btn.textContent = a;
-      btn.onclick = ()=> selectActivity(a);
-      col.appendChild(btn);
+  function setCategory(cat) {
+    selected.category = cat;
+    selected.activity = "";
+    selected.encounter = "";
+    let html = "<h3>Select Activity:</h3>";
+    for (let act in data[cat]) {
+      html += `<button class="activity" onclick="setActivity('${act}')">${act}</button>`;
     }
+    document.getElementById('activities').innerHTML = html;
+    document.getElementById('encounters').innerHTML = "";
+    updateMainQueue();
   }
 
-  function selectActivity(a){
-    activity = a;
-    const encs = activities[category][a];
-    const col = document.getElementById('encCol');
-    col.innerHTML = '<p>Encounters:</p>';
-    encs.forEach((e,i)=>{
-      const btn = document.createElement('button');
-      btn.className='encounter';
-      btn.textContent = e;
-      btn.onclick = ()=> selectEncounter(i+1);
-      col.appendChild(btn);
+  function setActivity(act) {
+    selected.activity = act;
+    selected.encounter = "";
+    let html = "<h3>Select Encounter:</h3>";
+    data[selected.category][act].forEach(enc => {
+      html += `<button class="encounter" onclick="setEncounter('${enc}')">${enc}</button>`;
     });
-    updateAll();
+    document.getElementById('encounters').innerHTML = html;
+    updateMainQueue();
   }
 
-  function selectEncounter(num){
-    encounter = num;
-    updateAll();
+  function setEncounter(enc) {
+    selected.encounter = enc;
+    updateMainQueue();
   }
 
-  function setDifficulty(d){
-    diff = d;
-    updateAll();
-  }
+  function updateMainQueue() {
+    let queue = `!queue ${selected.activity||'?'} ${selected.encounter||'?'} ${selected.bungie}`;
+    document.getElementById('mainQueue').innerText = queue;
 
-  function updateAll(){
-    const mQ = `!queue ${activity||'?'} ${encounter||'?'} ${diff} ${bungiename}`;
-    document.getElementById('mainQueue').innerText = mQ;
-
-    const tips = document.getElementById('botTips');
-    tips.innerHTML = '<h3>Bot Suggestions:</h3>';
-    if(activity && encounter){
-      bots.forEach(b=>{
-        const p = document.createElement('p');
-        p.innerText = `[${b}] → ${mQ}`;
-        const cp = document.createElement('button');
-        cp.innerText='Copy';
-        cp.onclick = ()=> navigator.clipboard.writeText(`${b}: ${mQ}`);
-        p.appendChild(cp);
-        tips.appendChild(p);
-      });
+    let botsHtml = "<h3>Bot Suggestions:</h3>";
+    for (let bot in botCheckpoints) {
+      if (
+        selected.activity && selected.encounter &&
+        botCheckpoints[bot][selected.category] &&
+        botCheckpoints[bot][selected.category][selected.activity] &&
+        botCheckpoints[bot][selected.category][selected.activity].includes(selected.encounter)
+      ) {
+        const botQueue = `${bot}: ${queue}`;
+        botsHtml += `<p>${botQueue} <button onclick="navigator.clipboard.writeText('${botQueue}')">Copy</button></p>`;
+      }
     }
+    document.getElementById('botSuggestions').innerHTML = botsHtml;
   }
 
-  function copyText(id){
+  function copyText(id) {
     navigator.clipboard.writeText(document.getElementById(id).innerText);
-    alert('Copied!');
+    alert('Copied to clipboard!');
   }
-
-  window.onload = updateAll;
 </script>
 </body>
 </html>
