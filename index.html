@@ -360,103 +360,24 @@
     <div class="top-controls" style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: center; margin-bottom: 32px;">
       <!-- Bungie Name Input -->
       <div class="bungie-name" style="margin-bottom: 0;">
-const botSupportMatrix = [
-  { bot: 'CheckpointList',
-    data: {
-      "Salvation's Edge": ['1: Substratum', '2: Dissipation', '🗝️ Chest 1', '3: Repository', '4: Verity', '🗝️ Chest 2', '5: The Witness'],
-      "Crota's End": ['1: Abyss', '2: Bridge', '🗝️ Chest 2', '3: Ir Yut / Deathsinger', '4: Crota'],
-      "Root of Nightmares": ['1: Cataclysm', '🗝️ Chest 1', '2: Scission', '🗝️ Chest 2', '3: Macrocosm / Explicator', '4: Nezarec'],
-      "King's Fall": ['1: Totems', '2: Warpriest', 'Maze / 🗝️ Chest 3', '3: Golgoroth', 'Wall / 🗝️ Chest 4', '4: Daughters / Deathsingers', '5: Oryx'],
-      "Vow of the Disciple": ['🗝️ Chest 1', '1: Acquisition', '2: Caretaker', '🗝️ Chest2', '3: Exhibition / The Upended', '4: Rhulk'],
-      "Vault of Glass": ['1: Confluxes / 🗝️ Chest 1 & 2', '2: Oracles', '3: Templar', 'Post-Templar', '4: Gatekeeper / 🗝️ Chest 4', '5: Atheon'],
-      "Deep Stone Crypt": ['1: Security', '2: Atraks-1', '🗝️ Chest 2', '3: Descent', '4: Taniks'],
-      "Garden of Salvation": ['1: Embrace', '🗝️ Chest 1', '2: Undergrowth', '3: Consecrated Mind', '🗝️ Chest 2', '4: Sanctified Mind'],
-      "Last Wish": ['1: Kali', '2: Shuro-Chi / 🗝️ Chest 1', '3: Morgeth / 🗝️ Chest 2', '🗝️ Chest 2', '4: Vault', '5: Riven'],
-      "Warlord's Ruin": ['1: Rathil / First Boss', '2: Tempest / Second Boss', '🗝️ Chest', '3: Hefnd / Final Boss'],
-      "Ghosts of the Deep": ['1: Ritual', '🗝️ Chest 1', '2: Ecthar / First Boss', '3: Simmumah / Final Boss / 🗝️ Chest 2'],
-      "Spire of the Watcher": ['🗝️ Chest 1', '1: Ascent', '2: Akelous / First Boss', '🗝️ Chest 2', '3: Persys / Final Boss'],
-      "Duality": ['1: Gahlran / First Boss', '🗝️ Chest 1', '2: Vault', '🗝️ Chest 2', '3: Caiatl / Final Boss'],
-      "Grasp of Avarice": ['🗝️ Chest 1', '1: Ogre / First Boss', '🗝️ Chest 2', '2: Shield', '3: Avarokk / Final Boss'],
-      "Prophecy": ['1: Phalanx / First Boss', '🗝️ Chest 1', '2: Cube', '🗝️ Chest 2', '3: Zulmak / Final Boss'],
-      "Pit of Heresy": ['1', '2', '3: Zulmak / Final Boss'],
-      "Shattered Throne": ['1', '2', '3: Simmumah / Final Boss'],
-      "Vesper's Host": ['1', '🗝️ Chest1', '2', '🗝️ Chest2', '3: Final Boss'],
-      "Sundered Doctrine": ['1: Flooded Inspection', '🗝️ Chest1', '2: Zoetic Lockset', '🗝️ Chest 2', '3: Kerrev, The Erased'],
-      "The Final Shape": ['1: Transmigration', '2: Temptation', '3: Exegesis', '4: Requiem', '5: Ascent', '6: Dissent', '7: Iconoclasm'],
-      "Lightfall": ['1: First Contact', '2: Under Siege', '3: Downfall', '4: Breakneck', '5: On The Verge', '6: No Time Left', '7: Headlong', '8: Desperate Measures'],
-      "Shared Wisdom": ['1: The Helm']
-    }
-  },
-  // ...repeat for other bots, using the same canonical names and order...
-];
-    }
-  },
-  { bot: 'GDB Bot',
-    data: {
-      'Duality': ['🗝️ Chest1', '🗝️ Chest2', 'Boss', '1(M)', '2(M)', 'Boss(M)'],
-      'Root of Nightmares': ['🗝️ Chest1', '🗝️ Chest2', 'Nezarec', 'Cataclysm(M)', 'Nezarec(M)'],
-      'Final Shape': ['Ascent', 'Dissent', 'Iconoclasm', 'Transmigration(M)', 'Temptation(M)', 'Exegesis(M)', 'Requiem(M)', 'Ascent(M)', 'Dissent(M)', 'Iconoclasm(M)'],
-      'Prophecy': ['1', '🗝️ Chest1', 'Boss'],
-      'Garden of Salvation': ['🗝️ Chest1', 'Sanctified'],
-      'Vault of Glass': ['Confluxes', 'Post-Templar'],
-      'Deep Stone Crypt': ['🗝️ Chest2', 'Taniks'],
-      'Last Wish': ['Shuro-Chi', 'Morgeth'],
-      'Vow of the Disciple': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Spire of the Watcher': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Lightfall': ['First Contact', 'First Contact(M)', 'Under Siege(M)', 'Downfall(M)', 'Breakneck(M)', 'On The Verge(M)', 'No Time Left(M)', 'Desperate Measures(M)'],
-      'Shattered Throne': ['Boss'],
-      'Grasp of Avarice': ['Boss'],
-      'Witch Queen': ['Arrival(M)', 'Investigation(M)', 'Ghosts(M)', 'Communion(M)', 'Mirror(M)', 'Cunning(M)', 'Last Chance(M)', 'Ritual(M)'],
-    }
-  },
-  { bot: 'D2Checkpoints Bot',
-    data: {
-      'Root of Nightmares': ['🗝️ Chest1', '🗝️ Chest2', 'Nezarec', 'Scission(M)', 'Macrocosm(M)', 'Nezarec(M)'],
-      'Duality': ['🗝️ Chest1', '🗝️ Chest2', 'Boss', '1(M)', '2(M)', 'Boss(M)'],
-      'Ghosts of the Deep': ['🗝️ Chest1', '2', 'Boss'],
-      'Prophecy': ['1', '2', 'Boss'],
-      'Spire of the Watcher': ['1', '2', 'Boss'],
-      'Vault of Glass': ['Confluxes', 'Post-Templar', 'Gatekeeper'],
-      'Deep Stone Crypt': ['Atraks-1', '🗝️ Chest2', 'Taniks'],
-      'Garden of Salvation': ['🗝️ Chest1', 'Sanctified'],
-      'Last Wish': ['Shuro-Chi', 'Morgeth'],
-      'Vow of the Disciple': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Shattered Throne': ['Boss'],
-      'Grasp of Avarice': ['Boss'],
-    }
-  },
-  { bot: 'D2Chests Bot',
-    data: {
-      'Vault of Glass': ['Confluxes', 'Post-Templar', 'Gatekeeper'],
-      'Spire of the Watcher': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Ghosts of the Deep': ['🗝️ Chest1', 'Boss'],
-      'Prophecy': ['Chests'],
-      'Last Wish': ['Shuro-Chi', 'Morgeth'],
-      'Garden of Salvation': ['🗝️ Chest1', 'Sanctified'],
-      'Vow of the Disciple': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Root of Nightmares': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Duality': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Deep Stone Crypt': ['🗝️ Chest2'],
-    }
-  },
-  { bot: 'DestinyCheckpoints Bot',
-    data: {
-      'Duality': ['🗝️ Chest1', '🗝️ Chest2', 'Boss', '1(M)', '2(M)', 'Boss(M)'],
-      'Root of Nightmares': ['🗝️ Chest1', '🗝️ Chest2', 'Nezarec', 'Nezarec(M)'],
-      'Prophecy': ['1', '🗝️ Chest1', 'Boss'],
-      'Spire of the Watcher': ['1', 'Boss'],
-      'Ghosts of the Deep': ['🗝️ Chest1', '2', 'Boss'],
-      'Vault of Glass': ['Confluxes', 'Post-Templar', 'Atheon'],
-      'Deep Stone Crypt': ['Atraks-1', '🗝️ Chest2', 'Taniks'],
-      'Garden of Salvation': ['🗝️ Chest1', 'Sanctified'],
-      'Vow of the Disciple': ['🗝️ Chest1', '🗝️ Chest2'],
-      'Last Wish': ['Shuro-Chi', 'Morgeth'],
-      'Grasp of Avarice': ['Boss'],
-      'Pit of Heresy': ['Boss'],
-      'Shattered Throne': ['Boss'],
-    }
-  },
-];
+        <label for="bungiename">Bungie Name:</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="bungiename"
+            placeholder="bungiename#0000"
+            value="fossagenie#9155"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Bungie Name"
+            aria-describedby="validationMessage"
+            required
+          />
+          <div class="validation-message" id="validationMessage" aria-live="polite">
+            Please enter a valid Bungie name (3-32 characters + #0000)
+          </div>
+        </div>
+      </div>
 
 // Returns array of bot names that support the given activity/encounter
 function getBotSupport(activityName, encounterName) {
