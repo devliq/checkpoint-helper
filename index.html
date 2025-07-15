@@ -1,151 +1,558 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Checkpoint Bot Queue Helper</title>
-  <style>
-    body {
-      background: #111 url('https://drive.google.com/uc?id=1ZPVU1KYPWhEBInb2f_wiTxChUlaDbjBc') center/cover no-repeat;
-      color: #fff; font-family: Arial, sans-serif; padding: 1em;
-    }
-    h1, h3 { text-align: center; }
-    .center { text-align: center; }
-    .button {
-      background: #333; color: #fff; border: none; padding: 0.6em 1em;
-      margin: 0.3em; border-radius: 6px; cursor: pointer;
-    }
-    .button:hover { background: #555; }
-    .activity, .encounter {
-      display: block; background: #222; margin: 0.3em auto;
-      width: 90%; padding: 0.5em; border-radius: 5px; cursor: pointer;
-    }
-    #botSuggestions p {
-      background: #222; margin: 0.3em; padding: 0.5em;
-      border-radius: 5px;
-    }
-    #botSuggestions button {
-      margin-left: 0.5em; background: #4CAF50; border: none; padding: 0.2em 0.5em; border-radius: 4px; color: white;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Activity Queue Selector</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: #eee;
+    padding: 20px;
+  }
+  button {
+    background-color: #222;
+    color: #eee;
+    border: 2px solid #444;
+    border-radius: 5px;
+    padding: 10px 16px;
+    margin: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  button:hover:not(:disabled) {
+    background-color: #444;
+    border-color: #aaa;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .highlighted {
+    background-color: #00aaff !important;
+    border-color: #00ddff !important;
+    color: #fff;
+  }
+  #activityTypeButtons, #difficultyButtons {
+    margin-bottom: 20px;
+  }
+  #difficultyButtons {
+    display: flex;
+    gap: 10px;
+  }
+  #encounterContainer button {
+    min-width: 120px;
+  }
+  #queueString {
+    margin-top: 30px;
+    font-size: 1.4em;
+    font-weight: 700;
+    background: #222;
+    padding: 10px;
+    border-radius: 6px;
+    user-select: all;
+  }
+  label {
+    display: block;
+    margin: 10px 0 6px;
+  }
+  input[type="text"] {
+    font-size: 1em;
+    padding: 8px;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #222;
+    color: #eee;
+  }
+  /* Containers hidden by default */
+  #raidsContainer, #dungeonsContainer, #otherActivityContainer {
+    display: none;
+    margin-bottom: 20px;
+  }
+  /* Activity buttons container styling */
+  .activity-buttons {
+    display: flex;
+    flex-wrap: wrap;
+  }
+</style>
 </head>
 <body>
-  <h1>Checkpoint Bot Queue Helper</h1>
 
-  <div class="center">
-    Bungie Name: <input id="bungiename" value="Guardian#1234" onkeyup="updateName()" />
-  </div>
+<h1>Activity Queue Selector</h1>
 
-  <div class="center">
-    <button class="button" onclick="setCategory('raids')">Raids</button>
-    <button class="button" onclick="setCategory('dungeons')">Dungeons</button>
-    <button class="button" onclick="setCategory('stories')">Stories/Other</button>
-  </div>
+<div id="activityTypeButtons">
+  <button id="raidsSelect" class="activitytype">Raids</button>
+  <button id="dungeonsSelect" class="activitytype">Dungeons</button>
+  <button id="storySelect" class="activitytype">Stories / Other</button>
+</div>
 
-  <div id="activities" class="center"></div>
-  <div id="encounters" class="center"></div>
-  <div class="center" style="margin-top:1em;">
-    <p id="mainQueue">!queue</p>
-    <button class="button" onclick="copyText('mainQueue')">Copy Main</button>
-  </div>
-  <div id="botSuggestions" style="margin-top:1em;"></div>
+<!-- Activity containers -->
+<div id="raidsContainer" class="activity-buttons"></div>
+<div id="dungeonsContainer" class="activity-buttons"></div>
+<div id="otherActivityContainer" class="activity-buttons"></div>
+
+<label for="encounterContainer">Select Encounter:</label>
+<div id="encounterContainer"></div>
+
+<div id="difficultyButtons">
+  <button id="difficultyNormalbutton" class="difficulty">Normal</button>
+  <button id="difficultyMasterbutton" class="difficulty">Master</button>
+</div>
+
+<label for="bungiename">Bungie Name (optional):</label>
+<input type="text" id="bungiename" placeholder="Enter your Bungie name" />
+
+<div id="queueString">!queue</div>
 
 <script>
-  const data = {
+  // Data structure
+  const activityData = {
     raids: {
-      "Duality": ['Chest1','Chest2','Boss','1(M)','2(M)','Boss(M)'],
-      "Root of Nightmares": ['Chest1','Chest2','Nezarec','Scission(M)','Explicator(M)','Nezarec(M)'],
-      "Vault of Glass": ['Confluxes','Post-Templar','Atheon'],
-      "Deep Stone Crypt": ['Atraks-1','Chest2','Taniks'],
-      "Garden of Salvation": ['Chest1','Sanctified'],
-      "Vow of the Disciple": ['Chest1','Chest2'],
-      "Last Wish": ['Shuro-Chi','Morgeth']
+      displayName: "Raids",
+      activities: {
+        "Salvation's Edge": {
+          code: "se",
+          encounters: [
+            "1: Substratum",
+            "2: Dissipation",
+            "Chest 1",
+            "3: Repository",
+            "4: Verity",
+            "Chest 2",
+            "5: The Witness",
+          ],
+          difficultyEnabled: true,
+        },
+        "Crota's End": {
+          code: "ce",
+          encounters: [
+            "1: Abyss",
+            "2: Bridge",
+            "Chest 2",
+            "3: Ir Yut / Deathsinger",
+            "4: Crota",
+          ],
+          difficultyEnabled: true,
+        },
+        "Root of Nightmares": {
+          code: "ron",
+          encounters: [
+            "1: Cataclysm",
+            "Chest 1",
+            "2: Scission",
+            "Chest 2",
+            "3: Macrocosm / Explicator",
+            "4: Nezarec",
+          ],
+          difficultyEnabled: true,
+        },
+        "King's Fall": {
+          code: "kf",
+          encounters: [
+            "1: Totems",
+            "2: Warpriest",
+            "Maze / Chest 3",
+            "3: Golgoroth",
+            "Wall / Chest 4",
+            "4: Daughters / Deathsingers",
+            "5: Oryx",
+          ],
+          difficultyEnabled: true,
+        },
+        "Vow of the Disciple": {
+          code: "votd",
+          encounters: [
+            "Chest 1",
+            "1: Acquisition",
+            "2: Caretaker",
+            "Chest2",
+            "3: Exhibition / The Upended",
+            "4: Rhulk",
+          ],
+          difficultyEnabled: true,
+        },
+        "Vault of Glass": {
+          code: "vog",
+          encounters: [
+            "1: Confluxes / Chest 1 & 2",
+            "2: Oracles",
+            "3: Templar",
+            "Post-Templar",
+            "4: Gatekeeper / Chest 4",
+            "5: Atheon",
+          ],
+          difficultyEnabled: true,
+        },
+        "Deep Stone Crypt": {
+          code: "dsc",
+          encounters: [
+            "1: Security",
+            "2: Atraks-1",
+            "Chest 2",
+            "3: Descent",
+            "4: Taniks",
+          ],
+          difficultyEnabled: false,
+        },
+        "Garden of Salvation": {
+          code: "gos",
+          encounters: [
+            "1: Embrace",
+            "Chest 1",
+            "2: Undergrowth",
+            "3: Consecrated Mind",
+            "Chest 2",
+            "4: Sanctified Mind",
+          ],
+          difficultyEnabled: false,
+        },
+        "Last Wish": {
+          code: "lw",
+          encounters: [
+            "1: Kali",
+            "2: Shuro-Chi / Chest 1",
+            "3: Morgeth / Chest 2",
+            "Chest 2",
+            "4: Vault",
+            "5: Riven",
+          ],
+          difficultyEnabled: false,
+        },
+      },
     },
+
     dungeons: {
-      "Ghosts of the Deep": ['Chest1','Chest2','Boss'],
-      "Prophecy": ['1','2','Boss'],
-      "Shattered Throne": ['Boss'],
-      "Pit of Heresy": ['Boss'],
-      "Grasp of Avarice": ['Boss'],
-      "Spire of the Watcher": ['1','2','Boss']
+      displayName: "Dungeons",
+      activities: {
+        "Warlord's Ruin": {
+          code: "wr",
+          encounters: [
+            "1: Rathil / First Boss",
+            "2: Tempest / Second Boss",
+            "Chest",
+            "3: Hefnd / Final Boss",
+          ],
+          difficultyEnabled: true,
+        },
+        "Ghosts of the Deep": {
+          code: "gotd",
+          encounters: [
+            "1: Ritual",
+            "Chest 1",
+            "2: Ecthar / First Boss",
+            "3: Simmumah / Final Boss / Chest 2",
+          ],
+          difficultyEnabled: true,
+        },
+        "Spire of the Watcher": {
+          code: "sotw",
+          encounters: [
+            "Chest 1",
+            "1: Ascent",
+            "2: Akelous / First Boss",
+            "Chest 2",
+            "3: Persys / Final Boss",
+          ],
+          difficultyEnabled: true,
+        },
+        "Duality": {
+          code: "duality",
+          encounters: [
+            "1: Gahlran / First Boss",
+            "Chest 1",
+            "2: Vault",
+            "Chest 2",
+            "3: Caiatl / Final Boss",
+          ],
+          difficultyEnabled: true,
+        },
+        "Grasp of Avarice": {
+          code: "goa",
+          encounters: [
+            "Chest 1",
+            "1: Ogre / First Boss",
+            "Chest 2",
+            "2: Shield",
+            "3: Avarokk / Final Boss",
+          ],
+          difficultyEnabled: true,
+        },
+        "Prophecy": {
+          code: "prophecy",
+          encounters: [
+            "1: Phalanx / First Boss",
+            "Chest 1",
+            "2: Cube",
+            "Chest 2",
+            "3: Zulmak / Final Boss",
+          ],
+          difficultyEnabled: false,
+        },
+        "Pit of Heresy": {
+          code: "poh",
+          encounters: ["1", "2", "3: Zulmak / Final Boss"],
+          difficultyEnabled: false,
+        },
+        "Shattered Throne": {
+          code: "st",
+          encounters: ["1", "2", "3: Simmumah / Final Boss"],
+          difficultyEnabled: false,
+        },
+        "Vesper's Host": {
+          code: "vh",
+          encounters: [
+            "1",
+            "Chest1",
+            "2",
+            "Chest2",
+            "3: Final Boss",
+          ],
+          difficultyEnabled: true,
+        },
+        "Sundered Doctrine": {
+          code: "sd",
+          encounters: [
+            "1: Flooded Inspection",
+            "Chest1",
+            "2: Zoetic Lockset",
+            "Chest 2",
+            "3: Kerrev, The Erased",
+          ],
+          difficultyEnabled: true,
+        },
+      },
     },
-    stories: {
-      "Final Shape": ['Ascent','Dissent','Iconoclasm','Transmigration(M)','Temptation(M)','Exegesis(M)','Requiem(M)','Ascent(M)','Dissent(M)','Iconoclasm(M)'],
-      "Lightfall": ['First Contact(M)','Under Siege(M)','Breakneck(M)','Desperate Measures(M)'],
-      "Witch Queen": ['Arrival(M)','Investigation(M)','Ghosts(M)','Communion(M)','Mirror(M)','Cunning(M)','Last Chance(M)','Ritual(M)']
-    }
+
+    other: {
+      displayName: "Stories/Other",
+      activities: {
+        "The Final Shape": {
+          code: "fs",
+          encounters: [
+            "1: Transmigration",
+            "2: Temptation",
+            "3: Exegesis",
+            "4: Requiem",
+            "5: Ascent",
+            "6: Dissent",
+            "7: Iconoclasm",
+          ],
+          difficultyEnabled: true,
+        },
+        Lightfall: {
+          code: "lf",
+          encounters: [
+            "1: First Contact",
+            "2: Under Siege",
+            "3: Downfall",
+            "4: Breakneck",
+            "5: On The Verge",
+            "6: No Time Left",
+            "7: Headlong",
+            "8: Desperate Measures",
+          ],
+          difficultyEnabled: true,
+        },
+        Shared Wisdom: {
+          code: "sw",
+          encounters: ["1: The Helm"],
+          difficultyEnabled: false,
+        },
+      },
+    },
   };
 
-  const botCheckpoints = {
-    "Discord": JSON.parse(JSON.stringify(data)),
-    "TCT": JSON.parse(JSON.stringify(data)),
-    "LB9": JSON.parse(JSON.stringify(data)),
-    "GDB": JSON.parse(JSON.stringify(data)),
-    "D2Checkpoints": JSON.parse(JSON.stringify(data)),
-    "D2Chests": JSON.parse(JSON.stringify(data)),
-    "DestinyCheckpoints": JSON.parse(JSON.stringify(data))
-  };
+  let currentActivityType = null;
+  let currentActivity = null;
+  let currentEncounter = null;
+  let currentDifficulty = false;
 
-  let selected = { category: "", activity: "", encounter: "", bungie: "Guardian#1234" };
-
-  function updateName() {
-    selected.bungie = document.getElementById('bungiename').value;
-    updateMainQueue();
-  }
-
-  function setCategory(cat) {
-    selected.category = cat;
-    selected.activity = "";
-    selected.encounter = "";
-    let html = "<h3>Select Activity:</h3>";
-    let sortedActs = Object.keys(data[cat]).sort();
-    sortedActs.forEach(act => {
-      html += `<button class="activity" onclick="setActivity('${act}')">${act}</button>`;
+  // Utility to clear highlights for buttons of a class
+  function clearHighlight(className) {
+    document.querySelectorAll(`button.${className}`).forEach((btn) => {
+      btn.classList.remove("highlighted");
     });
-    document.getElementById('activities').innerHTML = html;
-    document.getElementById('encounters').innerHTML = "";
-    updateMainQueue();
   }
 
-  function setActivity(act) {
-    selected.activity = act;
-    selected.encounter = "";
-    let html = "<h3>Select Encounter:</h3>";
-    let encounters = data[selected.category][act];
-    encounters.forEach(enc => {
-      html += `<button class="encounter" onclick="setEncounter('${enc}')">${enc}</button>`;
+  // Render activity buttons inside containers dynamically
+  function renderActivityButtons(activityType) {
+    currentActivityType = activityType;
+    currentActivity = null;
+    currentEncounter = null;
+    clearHighlight("activitytype");
+    clearHighlight("activity");
+    clearHighlight("encounter");
+    clearHighlight("difficulty");
+
+    // Show/hide activity containers
+    ["raidsContainer", "dungeonsContainer", "otherActivityContainer"].forEach((id) => {
+      document.getElementById(id).style.display = id === activityType + "Container" ? "flex" : "none";
     });
-    document.getElementById('encounters').innerHTML = html;
-    updateMainQueue();
-  }
 
-  function setEncounter(enc) {
-    selected.encounter = enc;
-    updateMainQueue();
-  }
+    // Highlight selected activity type button
+    clearHighlight("activitytype");
+    document.getElementById(activityType + "Select").classList.add("highlighted");
 
-  function updateMainQueue() {
-    let queue = `!queue ${selected.activity||'?'} ${selected.encounter||'?'} ${selected.bungie}`;
-    document.getElementById('mainQueue').innerText = queue;
-
-    let botsHtml = "<h3>Bot Suggestions:</h3>";
-    for (let bot in botCheckpoints) {
-      if (
-        selected.activity && selected.encounter &&
-        botCheckpoints[bot][selected.category] &&
-        botCheckpoints[bot][selected.category][selected.activity] &&
-        botCheckpoints[bot][selected.category][selected.activity].includes(selected.encounter)
-      ) {
-        const botQueue = `${bot}: ${queue}`;
-        botsHtml += `<p>${botQueue} <button onclick="navigator.clipboard.writeText('${botQueue}')">Copy</button></p>`;
-      }
+    // Populate activity buttons in container
+    const container = document.getElementById(activityType + "Container");
+    container.innerHTML = "";
+    const activities = activityData[activityType].activities;
+    for (const activityName in activities) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = activityName;
+      btn.className = "activity";
+      btn.onclick = () => selectActivity(activityName);
+      container.appendChild(btn);
     }
-    document.getElementById('botSuggestions').innerHTML = botsHtml;
+
+    // Auto select first activity
+    const firstActivity = Object.keys(activities)[0];
+    if (firstActivity) {
+      selectActivity(firstActivity);
+    }
   }
 
-  function copyText(id) {
-    navigator.clipboard.writeText(document.getElementById(id).innerText);
-    alert('Copied to clipboard!');
+  // Show encounter buttons for selected activity
+  function renderEncounterButtons(activityName) {
+    currentActivity = activityName;
+    currentEncounter = null;
+    clearHighlight("activity");
+    clearHighlight("encounter");
+    clearHighlight("difficulty");
+
+    // Highlight the selected activity button
+    const container = document.getElementById(currentActivityType + "Container");
+    Array.from(container.children).forEach((btn) => {
+      btn.classList.toggle("highlighted", btn.textContent === activityName);
+    });
+
+    const activityInfo = activityData[currentActivityType].activities[activityName];
+    const encounters = activityInfo.encounters;
+    const difficultyEnabled = activityInfo.difficultyEnabled;
+
+    // Show/hide difficulty buttons
+    if (difficultyEnabled) {
+      enableDifficultyButtons();
+    } else {
+      disableDifficultyButtons();
+    }
+
+    // Render encounter buttons
+    const encounterContainer = document.getElementById("encounterContainer");
+    encounterContainer.innerHTML = "";
+    encounters.forEach((encounterLabel) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "encounter";
+      btn.textContent = encounterLabel;
+      btn.onclick = () => selectEncounter(encounterLabel, btn);
+      encounterContainer.appendChild(btn);
+    });
+
+    // Auto-select first encounter
+    if (encounters.length > 0) {
+      selectEncounter(encounters[0]);
+    }
   }
+
+  // Enable difficulty buttons
+  function enableDifficultyButtons() {
+    const diffButtons = document.getElementById("difficultyButtons");
+    diffButtons.style.display = "flex";
+    document.getElementById("difficultyNormalbutton").disabled = false;
+    document.getElementById("difficultyMasterbutton").disabled = false;
+    if (currentDifficulty === null) currentDifficulty = false;
+    highlightDifficultyButton(currentDifficulty);
+  }
+
+  // Disable difficulty buttons
+  function disableDifficultyButtons() {
+    const diffButtons = document.getElementById("difficultyButtons");
+    diffButtons.style.display = "none";
+    document.getElementById("difficultyNormalbutton").disabled = true;
+    document.getElementById("difficultyMasterbutton").disabled = true;
+    currentDifficulty = null;
+  }
+
+  // Highlight difficulty button
+  function highlightDifficultyButton(difficultyBool) {
+    clearHighlight("difficulty");
+    if (difficultyBool === false) {
+      document.getElementById("difficultyNormalbutton").classList.add("highlighted");
+    } else if (difficultyBool === true) {
+      document.getElementById("difficultyMasterbutton").classList.add("highlighted");
+    }
+  }
+
+  function selectDifficulty(difficultyBool) {
+    currentDifficulty = difficultyBool;
+    highlightDifficultyButton(difficultyBool);
+    updateQueueString();
+  }
+
+  function selectEncounter(encounterLabel, btnElement) {
+    currentEncounter = encounterLabel;
+    clearHighlight("encounter");
+    if (btnElement) btnElement.classList.add("highlighted");
+    updateQueueString();
+  }
+
+  function selectActivity(activityName) {
+    renderEncounterButtons(activityName);
+    // Reset difficulty to Normal on activity change if enabled
+    currentDifficulty = false;
+    highlightDifficultyButton(currentDifficulty);
+    updateQueueString();
+  }
+
+  // Build queue string
+  function updateQueueString() {
+    if (!currentActivity || !currentEncounter) {
+      document.getElementById("queueString").textContent = "!queue";
+      return;
+    }
+    const activityCode = activityData[currentActivityType].activities[currentActivity].code;
+
+    let encounterCode = "";
+    if (/^\d/.test(currentEncounter)) {
+      encounterCode = currentEncounter.match(/^\d+/)[0];
+    } else {
+      encounterCode = currentEncounter.toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    const difficultyCode = currentDifficulty === true ? "m" : "n";
+
+    const bungieNameInput = document.getElementById("bungiename");
+    const bungieName = bungieNameInput ? bungieNameInput.value.trim() : "";
+
+    let queueStr = `!queue ${activityCode} ${encounterCode} ${difficultyCode}`;
+    if (bungieName.length > 0) {
+      queueStr += ` ${bungieName}`;
+    }
+
+    document.getElementById("queueString").textContent = queueStr;
+  }
+
+  // Attach event listeners for main activity type buttons
+  document.getElementById("raidsSelect").onclick = () => renderActivityButtons("raids");
+  document.getElementById("dungeonsSelect").onclick = () => renderActivityButtons("dungeons");
+  document.getElementById("storySelect").onclick = () => renderActivityButtons("other");
+
+  // Difficulty buttons listeners
+  document.getElementById("difficultyNormalbutton").onclick = () => selectDifficulty(false);
+  document.getElementById("difficultyMasterbutton").onclick = () => selectDifficulty(true);
+
+  // Bungie name input listener
+  document.getElementById("bungiename").addEventListener("input", updateQueueString);
+
+  // Initial load: Show raids
+  renderActivityButtons("raids");
 </script>
+
 </body>
 </html>
