@@ -5,163 +5,376 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Twitch Checkpoint Bot Queue Helper</title>
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     color: white;
-    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 20px;
+    min-height: 100vh;
   }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
   h1 {
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, #4CAF50, #2196F3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+
   .bungie-name {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
+
+  .bungie-name label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #e0e0e0;
+  }
+
+  .input-group {
+    position: relative;
+    display: inline-block;
+  }
+
   input#bungiename {
-    padding: 5px;
+    padding: 12px 16px;
     font-size: 1rem;
-    border-radius: 6px;
-    border: none;
-    width: 220px;
+    border-radius: 8px;
+    border: 2px solid #555;
+    width: 250px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
+
+  input#bungiename:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+  }
+
+  input#bungiename.valid {
+    border-color: #4CAF50;
+  }
+
+  input#bungiename.invalid {
+    border-color: #f44336;
+  }
+
+  .validation-message {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #f44336;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .validation-message.show {
+    opacity: 1;
+  }
+
+  .section {
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #e0e0e0;
+  }
+
   .flex-parent {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
   }
+
   button {
-    border-radius: 12px;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 10px 15px;
-    font-weight: bold;
+    padding: 12px 20px;
+    font-weight: 600;
     font-size: 1rem;
     border: none;
     color: white;
     user-select: none;
-    transition: background-color 0.2s, box-shadow 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
+
+  button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+
+  button:hover::before {
+    width: 200px;
+    height: 200px;
+  }
+
   button.activitytype {
-    background-color: #b83232; /* red-ish */
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
     flex: 1 1 120px;
-    max-width: 150px;
+    max-width: 200px;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
   }
-  button.activity {
-    background-color: #111;
+
+  button.activitytype:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+  }
+
+  button.activity, button.encounter {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
     flex: 1 1 120px;
-    max-width: 250px;
-    margin-bottom: 6px;
+    max-width: 300px;
+    margin-bottom: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
-  button.encounter {
-    background-color: #111;
-    flex: 1 1 120px;
-    max-width: 250px;
-    margin-bottom: 6px;
+
+  button.activity:hover, button.encounter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
   }
+
   button.difficulty {
-    background-color: purple;
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
     flex: 1 1 120px;
-    max-width: 150px;
+    max-width: 180px;
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
   }
+
+  button.difficulty:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
+  }
+
   button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+    transform: none !important;
   }
+
+  button:disabled::before {
+    display: none;
+  }
+
   .highlighted {
-    background-color: #4CAF50 !important; /* bright green */
-    box-shadow: 0 0 8px 2px #88ff88;
+    background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.6) !important;
+    transform: scale(1.05);
   }
-  .container {
-    display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 20px;
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 30px;
   }
+
   .column {
-    min-width: 280px;
-    max-width: 320px;
+    min-width: 0;
   }
-  .typeText {
+
+  .column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .queue-section {
     text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
-    font-size: 1.1rem;
+    margin-top: 40px;
   }
-  .queueOptions {
-    text-align: center;
-    font-size: 1.1rem;
-    margin-top: 10px;
-  }
-  #queueString {
-    background: rgba(0,0,0,0.3);
-    padding: 10px;
-    border-radius: 10px;
+
+  .queue-output {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid #555;
+    padding: 20px;
+    border-radius: 12px;
     display: inline-block;
-    min-width: 220px;
+    min-width: 300px;
+    margin-bottom: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
     user-select: all;
+    transition: border-color 0.3s;
   }
-  button.copy-btn {
-    margin-top: 10px;
-    background-color: #333;
+
+  .queue-output.ready {
+    border-color: #4CAF50;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
   }
-  @media (max-width: 700px) {
-    .container {
-      flex-direction: column;
-      align-items: center;
+
+  .copy-btn {
+    background: linear-gradient(135deg, #34495e, #2c3e50);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .copy-btn:active {
+    transform: translateY(0);
+  }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .flex-parent {
+      gap: 8px;
+    }
+    
+    button {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+    }
+    
+    input#bungiename {
+      width: 200px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .queue-output {
+      min-width: 250px;
+      font-size: 1rem;
     }
   }
 </style>
 </head>
 <body>
-  <h1>Twitch Checkpoint Bot Queue Helper</h1>
-  <p class="bungie-name">
-    Bungie Name: 
-    <input
-      type="text"
-      id="bungiename"
-      placeholder="bungiename#0000"
-      value="fossagenie#9155"
-      oninput="validateBungieName()"
-      autocomplete="off"
-      spellcheck="false"
-    />
-  </p>
-
-  <div class="flex-parent" id="activityTypeButtons">
-    <!-- Activity Type buttons injected here -->
-  </div>
-
   <div class="container">
-    <div class="column">
-      <p class="typeText">Activity:</p>
-      <div id="activityButtons" class="flex-parent" style="flex-direction: column;">
-        <!-- Activity buttons injected here -->
+    <h1>Twitch Checkpoint Bot Queue Helper</h1>
+    
+    <div class="bungie-name">
+      <label for="bungiename">Bungie Name:</label>
+      <div class="input-group">
+        <input
+          type="text"
+          id="bungiename"
+          placeholder="bungiename#0000"
+          value="fossagenie#9155"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="validation-message" id="validationMessage">
+          Please enter a valid Bungie name (3-32 characters + #0000)
+        </div>
       </div>
     </div>
-    <div class="column">
-      <p class="typeText">Encounter:</p>
-      <div id="encounterButtons" class="flex-parent" style="flex-direction: column;">
-        <!-- Encounter buttons injected here -->
+
+    <div class="section">
+      <div class="section-title">Activity Type</div>
+      <div class="flex-parent" id="activityTypeButtons">
+        <!-- Activity Type buttons injected here -->
       </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="column">
+        <div class="section-title">Activity</div>
+        <div id="activityButtons" class="column-content">
+          <!-- Activity buttons injected here -->
+        </div>
+      </div>
+      <div class="column">
+        <div class="section-title">Encounter</div>
+        <div id="encounterButtons" class="column-content">
+          <!-- Encounter buttons injected here -->
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Difficulty</div>
+      <div class="flex-parent" id="difficultyButtons">
+        <button id="difficultyNormalbutton" class="difficulty" type="button">Normal</button>
+        <button id="difficultyMasterbutton" class="difficulty" type="button">Master</button>
+      </div>
+    </div>
+
+    <div class="queue-section">
+      <div class="section-title">Queue Command</div>
+      <div id="queueString" class="queue-output">!queue</div>
+      <br>
+      <button class="copy-btn" type="button" id="copyButton">Copy to Clipboard</button>
     </div>
   </div>
 
-  <div class="flex-parent" id="difficultyButtons" style="justify-content:center; margin-bottom:20px;">
-    <button id="difficultyNormalbutton" class="difficulty" type="button" onclick="selectDifficulty(false)">Normal</button>
-    <button id="difficultyMasterbutton" class="difficulty" type="button" onclick="selectDifficulty(true)">Master</button>
-  </div>
-
-  <div class="queueOptions">
-    <p id="queueString">!queue</p>
-    <button class="copy-btn" type="button" onclick="copyQueueString()">Copy to Clipboard</button>
-  </div>
+  <div class="toast" id="toast">Copied to clipboard!</div>
 
 <script>
-  // Activities sorted oldest → newest
+  // Enhanced activity data with better organization
   const activityData = {
     raids: {
       displayName: "Raids",
@@ -412,207 +625,348 @@
     },
   };
 
-  // State variables
-  let selectedActivityType = null;
-  let selectedActivity = null;
-  let selectedEncounter = null;
-  let isMasterDifficulty = false;
+  // Application state
+  class AppState {
+    constructor() {
+      this.selectedActivityType = null;
+      this.selectedActivity = null;
+      this.selectedEncounter = null;
+      this.isMasterDifficulty = false;
+      this.isValid = false;
+    }
 
-  // DOM elements
-  const activityTypeContainer = document.getElementById("activityTypeButtons");
-  const activityContainer = document.getElementById("activityButtons");
-  const encounterContainer = document.getElementById("encounterButtons");
-  const queueStringEl = document.getElementById("queueString");
-  const bungieNameInput = document.getElementById("bungiename");
-  const difficultyNormalBtn = document.getElementById("difficultyNormalbutton");
-  const difficultyMasterBtn = document.getElementById("difficultyMasterbutton");
+    reset() {
+      this.selectedActivity = null;
+      this.selectedEncounter = null;
+      this.isMasterDifficulty = false;
+    }
 
-  // Create activity type buttons
-  function createActivityTypeButtons() {
-    activityTypeContainer.innerHTML = "";
-    for (const typeKey in activityData) {
-      const btn = document.createElement("button");
-      btn.textContent = activityData[typeKey].displayName;
-      btn.classList.add("activitytype");
-      btn.id = `activitytype-${typeKey}`;
-      btn.type = "button";
-      btn.onclick = () => selectActivityType(typeKey);
-      activityTypeContainer.appendChild(btn);
+    isComplete() {
+      return this.selectedActivityType && 
+             this.selectedActivity && 
+             this.selectedEncounter !== null && 
+             this.isValid;
     }
   }
 
-  // Select activity type
-  function selectActivityType(typeKey) {
-    if (selectedActivityType === typeKey) return;
+  // DOM elements cache
+  const elements = {
+    activityTypeContainer: document.getElementById("activityTypeButtons"),
+    activityContainer: document.getElementById("activityButtons"),
+    encounterContainer: document.getElementById("encounterButtons"),
+    queueStringEl: document.getElementById("queueString"),
+    bungieNameInput: document.getElementById("bungiename"),
+    validationMessage: document.getElementById("validationMessage"),
+    difficultyNormalBtn: document.getElementById("difficultyNormalbutton"),
+    difficultyMasterBtn: document.getElementById("difficultyMasterbutton"),
+    copyButton: document.getElementById("copyButton"),
+    toast: document.getElementById("toast")
+  };
 
-    selectedActivityType = typeKey;
-    selectedActivity = null;
-    selectedEncounter = null;
-    isMasterDifficulty = false;
+  // Application state
+  const state = new AppState();
 
-    highlightButtons(activityTypeContainer, `activitytype-${typeKey}`);
+  // Utility functions
+  const utils = {
+    debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    },
 
-    renderActivities(typeKey);
-    encounterContainer.innerHTML = "";
+    generateId(prefix, text) {
+      return `${prefix}-${text.replace(/\s+/g, "-").toLowerCase()}`;
+    },
 
-    updateDifficultyButtons(false);
-    updateQueueString();
-  }
+    showToast(message, duration = 3000) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add('show');
+      setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, duration);
+    },
 
-  // Render activity buttons for selected type
-  function renderActivities(typeKey) {
-    activityContainer.innerHTML = "";
-    const activities = activityData[typeKey].activities;
-
-    for (const activityName in activities) {
-      const btn = document.createElement("button");
-      btn.textContent = activityName;
-      btn.classList.add("activity");
-      btn.id = `activity-${activityName.replace(/\s+/g, "-").toLowerCase()}`;
-      btn.type = "button";
-      btn.onclick = () => selectActivity(activityName);
-      activityContainer.appendChild(btn);
+    validateBungieName(name) {
+      const regex = /^.{3,32}#\d{4}$/;
+      return regex.test(name.trim());
     }
-  }
+  };
 
-  // Select an activity
-  function selectActivity(activityName) {
-    if (selectedActivity === activityName) return;
+  // UI management
+  const ui = {
+    highlightButton(container, selectedId) {
+      Array.from(container.children).forEach((btn) => {
+        btn.classList.toggle("highlighted", btn.id === selectedId);
+      });
+    },
 
-    selectedActivity = activityName;
-    selectedEncounter = null;
-    isMasterDifficulty = false;
-
-    highlightButtons(activityContainer, `activity-${activityName.replace(/\s+/g, "-").toLowerCase()}`);
-
-    renderEncounters(selectedActivityType, activityName);
-
-    updateDifficultyButtons(false);
-    updateQueueString();
-  }
-
-  // Render encounters for selected activity
-  function renderEncounters(typeKey, activityName) {
-    encounterContainer.innerHTML = "";
-    const activity = activityData[typeKey].activities[activityName];
-    if (!activity) return;
-
-    activity.encounters.forEach((encounter, idx) => {
+    createButton(text, classes, id, onClick) {
       const btn = document.createElement("button");
-      btn.textContent = encounter;
-      btn.classList.add("encounter");
+      btn.textContent = text;
+      btn.className = classes;
+      btn.id = id;
       btn.type = "button";
-      btn.id = `encounter-${idx}`;
-      btn.onclick = () => selectEncounter(idx);
-      encounterContainer.appendChild(btn);
-    });
+      btn.onclick = onClick;
+      return btn;
+    },
 
-    // Auto-select first encounter if exists
-    if (activity.encounters.length > 0) {
-      selectEncounter(0);
+    updateValidation(isValid) {
+      const input = elements.bungieNameInput;
+      const message = elements.validationMessage;
+      
+      input.classList.toggle('valid', isValid);
+      input.classList.toggle('invalid', !isValid);
+      message.classList.toggle('show', !isValid);
+    },
+
+    updateQueueOutput() {
+      const output = elements.queueStringEl;
+      const queueStr = queueManager.generateQueueString();
+      const isReady = state.isComplete();
+      
+      output.textContent = queueStr;
+      output.classList.toggle('ready', isReady);
+      elements.copyButton.disabled = !isReady;
     }
-  }
+  };
 
-  // Select an encounter
-  function selectEncounter(encounterIdx) {
-    if (selectedEncounter === encounterIdx) return;
-
-    selectedEncounter = encounterIdx;
-    highlightButtons(encounterContainer, `encounter-${encounterIdx}`);
-    updateQueueString();
-  }
-
-  // Highlight only one button by id within container
-  function highlightButtons(container, selectedId) {
-    Array.from(container.children).forEach((btn) => {
-      btn.classList.toggle("highlighted", btn.id === selectedId);
-    });
-  }
-
-  // Select difficulty and update highlight and enable/disable master button
-  function selectDifficulty(masterSelected) {
-    isMasterDifficulty = masterSelected;
-    updateDifficultyButtons(masterSelected);
-    updateQueueString();
-  }
-
-  // Update difficulty button styles and disabled state
-  function updateDifficultyButtons(masterSelected) {
-    difficultyNormalBtn.classList.toggle("highlighted", !masterSelected);
-    difficultyMasterBtn.classList.toggle("highlighted", masterSelected);
-
-    if (selectedActivityType && selectedActivity) {
-      const difficultyAllowed = activityData[selectedActivityType].activities[selectedActivity].difficultyEnabled;
-      difficultyMasterBtn.disabled = !difficultyAllowed;
-      if (!difficultyAllowed && masterSelected) {
-        // Reset to normal if master is not allowed
-        isMasterDifficulty = false;
-        difficultyNormalBtn.classList.add("highlighted");
-        difficultyMasterBtn.classList.remove("highlighted");
+  // Queue string management
+  const queueManager = {
+    generateQueueString() {
+      if (!state.isComplete()) {
+        return "!queue";
       }
-    } else {
-      difficultyMasterBtn.disabled = true;
+
+      const bungieName = elements.bungieNameInput.value.trim();
+      const activityInfo = activityData[state.selectedActivityType].activities[state.selectedActivity];
+      const difficultyCode = state.isMasterDifficulty ? "m" : "n";
+      const encounterNum = state.selectedEncounter + 1;
+
+      return `!queue ${bungieName} ${activityInfo.code} ${encounterNum} ${difficultyCode}`;
+    },
+
+    async copyToClipboard() {
+      const queueStr = elements.queueStringEl.textContent;
+      
+      try {
+        await navigator.clipboard.writeText(queueStr);
+        utils.showToast("Copied to clipboard!");
+      } catch (error) {
+        console.error('Failed to copy:', error);
+        utils.showToast("Failed to copy to clipboard", 3000);
+      }
     }
-  }
+  };
 
-  // Bungie name validation
-  function validateBungieName() {
-    const val = bungieNameInput.value.trim();
-    const regex = /^.{3,32}#\d{4}$/;
-    if (!regex.test(val)) {
-      bungieNameInput.style.borderColor = "red";
-    } else {
-      bungieNameInput.style.borderColor = "";
+  // Activity type management
+  const activityTypeManager = {
+    init() {
+      this.createButtons();
+      // Auto-select first activity type
+      const firstType = Object.keys(activityData)[0];
+      if (firstType) {
+        this.select(firstType);
+      }
+    },
+
+    createButtons() {
+      elements.activityTypeContainer.innerHTML = "";
+      
+      Object.entries(activityData).forEach(([typeKey, typeData]) => {
+        const btn = ui.createButton(
+          typeData.displayName,
+          "activitytype",
+          utils.generateId("activitytype", typeKey),
+          () => this.select(typeKey)
+        );
+        elements.activityTypeContainer.appendChild(btn);
+      });
+    },
+
+    select(typeKey) {
+      if (state.selectedActivityType === typeKey) return;
+
+      state.selectedActivityType = typeKey;
+      state.reset();
+
+      ui.highlightButton(elements.activityTypeContainer, utils.generateId("activitytype", typeKey));
+      
+      activityManager.render(typeKey);
+      encounterManager.clear();
+      difficultyManager.update();
+      ui.updateQueueOutput();
     }
-    updateQueueString();
-  }
+  };
 
-  // Generate queue string
-  function updateQueueString() {
-    if (
-      !selectedActivityType ||
-      !selectedActivity ||
-      selectedEncounter === null ||
-      !bungieNameInput.value.trim() ||
-      bungieNameInput.style.borderColor === "red"
-    ) {
-      queueStringEl.textContent = "!queue";
-      return;
+  // Activity management
+  const activityManager = {
+    render(typeKey) {
+      elements.activityContainer.innerHTML = "";
+      const activities = activityData[typeKey].activities;
+
+      Object.keys(activities).forEach(activityName => {
+        const btn = ui.createButton(
+          activityName,
+          "activity",
+          utils.generateId("activity", activityName),
+          () => this.select(activityName)
+        );
+        elements.activityContainer.appendChild(btn);
+      });
+    },
+
+    select(activityName) {
+      if (state.selectedActivity === activityName) return;
+
+      state.selectedActivity = activityName;
+      state.selectedEncounter = null;
+      state.isMasterDifficulty = false;
+
+      ui.highlightButton(elements.activityContainer, utils.generateId("activity", activityName));
+      
+      encounterManager.render(state.selectedActivityType, activityName);
+      difficultyManager.update();
+      ui.updateQueueOutput();
     }
+  };
 
-    const bungieName = bungieNameInput.value.trim();
-    const activityInfo = activityData[selectedActivityType].activities[selectedActivity];
-    const difficultyCode = isMasterDifficulty ? "m" : "n";
-    const encounterNum = selectedEncounter + 1;
+  // Encounter management
+  const encounterManager = {
+    render(typeKey, activityName) {
+      elements.encounterContainer.innerHTML = "";
+      const activity = activityData[typeKey].activities[activityName];
+      if (!activity) return;
 
-    const queueStr = `!queue ${bungieName} ${activityInfo.code} ${encounterNum} ${difficultyCode}`;
-    queueStringEl.textContent = queueStr;
-  }
+      activity.encounters.forEach((encounter, idx) => {
+        const btn = ui.createButton(
+          encounter,
+          "encounter",
+          utils.generateId("encounter", idx.toString()),
+          () => this.select(idx)
+        );
+        elements.encounterContainer.appendChild(btn);
+      });
 
-  // Copy queue string to clipboard
-  async function copyQueueString() {
-    try {
-      await navigator.clipboard.writeText(queueStringEl.textContent);
-      alert("Copied to clipboard!");
-    } catch {
-      alert("Failed to copy!");
+      // Auto-select first encounter
+      if (activity.encounters.length > 0) {
+        this.select(0);
+      }
+    },
+
+    select(encounterIdx) {
+      if (state.selectedEncounter === encounterIdx) return;
+
+      state.selectedEncounter = encounterIdx;
+      ui.highlightButton(elements.encounterContainer, utils.generateId("encounter", encounterIdx.toString()));
+      ui.updateQueueOutput();
+    },
+
+    clear() {
+      elements.encounterContainer.innerHTML = "";
     }
-  }
+  };
 
-  // Initialize on page load
+  // Difficulty management
+  const difficultyManager = {
+    init() {
+      elements.difficultyNormalBtn.onclick = () => this.select(false);
+      elements.difficultyMasterBtn.onclick = () => this.select(true);
+      this.select(false); // Default to normal
+    },
+
+    select(masterSelected) {
+      state.isMasterDifficulty = masterSelected;
+      this.updateUI();
+      ui.updateQueueOutput();
+    },
+
+    update() {
+      this.updateUI();
+    },
+
+    updateUI() {
+      const { difficultyNormalBtn, difficultyMasterBtn } = elements;
+      
+      difficultyNormalBtn.classList.toggle("highlighted", !state.isMasterDifficulty);
+      difficultyMasterBtn.classList.toggle("highlighted", state.isMasterDifficulty);
+
+      if (state.selectedActivityType && state.selectedActivity) {
+        const difficultyAllowed = activityData[state.selectedActivityType].activities[state.selectedActivity].difficultyEnabled;
+        difficultyMasterBtn.disabled = !difficultyAllowed;
+        
+        if (!difficultyAllowed && state.isMasterDifficulty) {
+          state.isMasterDifficulty = false;
+          difficultyNormalBtn.classList.add("highlighted");
+          difficultyMasterBtn.classList.remove("highlighted");
+        }
+      } else {
+        difficultyMasterBtn.disabled = true;
+      }
+    }
+  };
+
+  // Input validation
+  const inputManager = {
+    init() {
+      const debouncedValidate = utils.debounce(() => {
+        this.validate();
+      }, 300);
+
+      elements.bungieNameInput.addEventListener('input', debouncedValidate);
+      elements.bungieNameInput.addEventListener('blur', () => this.validate());
+      
+      // Initial validation
+      this.validate();
+    },
+
+    validate() {
+      const name = elements.bungieNameInput.value.trim();
+      state.isValid = utils.validateBungieName(name);
+      
+      ui.updateValidation(state.isValid);
+      ui.updateQueueOutput();
+    }
+  };
+
+  // Event handlers
+  const eventHandlers = {
+    init() {
+      elements.copyButton.addEventListener('click', () => {
+        queueManager.copyToClipboard();
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'c' && state.isComplete()) {
+          e.preventDefault();
+          queueManager.copyToClipboard();
+        }
+      });
+    }
+  };
+
+  // Application initialization
   function init() {
-    createActivityTypeButtons();
-
-    // Select first activity type by default
-    const firstType = Object.keys(activityData)[0];
-    if (firstType) selectActivityType(firstType);
-
-    // Default difficulty to Normal
-    selectDifficulty(false);
+    try {
+      activityTypeManager.init();
+      difficultyManager.init();
+      inputManager.init();
+      eventHandlers.init();
+      
+      console.log('Twitch Checkpoint Bot Queue Helper initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize application:', error);
+    }
   }
 
-  // Start app
-  init();
+  // Start the application
+  document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
