@@ -32,7 +32,7 @@
   <h1>Checkpoint Bot Queue Helper</h1>
 
   <div class="center">
-    Bungie Name: <input id="bungiename" value="fossagenie#9155" onkeyup="updateName()" />
+    Bungie Name: <input id="bungiename" value="Guardian#1234" onkeyup="updateName()" />
   </div>
 
   <div class="center">
@@ -76,13 +76,13 @@
   };
 
   const botCheckpoints = {
-    "Discord": data,
-    "TCT": data,
-    "LB9": data,
-    "GDB": data,
-    "D2Checkpoints": data,
-    "D2Chests": data,
-    "DestinyCheckpoints": data
+    "Discord": JSON.parse(JSON.stringify(data)),
+    "TCT": JSON.parse(JSON.stringify(data)),
+    "LB9": JSON.parse(JSON.stringify(data)),
+    "GDB": JSON.parse(JSON.stringify(data)),
+    "D2Checkpoints": JSON.parse(JSON.stringify(data)),
+    "D2Chests": JSON.parse(JSON.stringify(data)),
+    "DestinyCheckpoints": JSON.parse(JSON.stringify(data))
   };
 
   let selected = { category: "", activity: "", encounter: "", bungie: "Guardian#1234" };
@@ -97,9 +97,10 @@
     selected.activity = "";
     selected.encounter = "";
     let html = "<h3>Select Activity:</h3>";
-    for (let act in data[cat]) {
+    let sortedActs = Object.keys(data[cat]).sort();
+    sortedActs.forEach(act => {
       html += `<button class="activity" onclick="setActivity('${act}')">${act}</button>`;
-    }
+    });
     document.getElementById('activities').innerHTML = html;
     document.getElementById('encounters').innerHTML = "";
     updateMainQueue();
@@ -109,7 +110,8 @@
     selected.activity = act;
     selected.encounter = "";
     let html = "<h3>Select Encounter:</h3>";
-    data[selected.category][act].forEach(enc => {
+    let encounters = data[selected.category][act];
+    encounters.forEach(enc => {
       html += `<button class="encounter" onclick="setEncounter('${enc}')">${enc}</button>`;
     });
     document.getElementById('encounters').innerHTML = html;
