@@ -10,76 +10,65 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <div class="container" role="main">
-    <!-- Top controls: Bungie Name, Difficulty, and Queue Command -->
-    <div class="top-controls" style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: center; margin-bottom: 32px;">
-      <!-- Bungie Name Input -->
-      <div class="bungie-name" style="margin-bottom: 0;">
+    <header>
+      <h1 id="main-title">Twitch Checkpoint Bot Queue Helper</h1>
+    </header>
+    <section class="top-controls" aria-labelledby="main-title">
+      <form class="bungie-name" autocomplete="off" spellcheck="false" aria-label="Bungie Name Input" novalidate>
         <label for="bungiename">Bungie Name:</label>
         <div class="input-group">
           <input
             type="text"
             id="bungiename"
             placeholder="bungiename#0000"
-            value="fossagenie#9155"
-            autocomplete="off"
-            spellcheck="false"
             aria-label="Bungie Name"
             aria-describedby="validationMessage"
             required
+            autocomplete="off"
+            spellcheck="false"
           />
           <div class="validation-message" id="validationMessage" aria-live="polite">
             Please enter a valid Bungie name (3-32 characters + #0000)
           </div>
         </div>
-      </div>
-      <!-- Activity Type and Difficulty in a row -->
-      <div class="section" style="margin-bottom: 0;">
-        <div style="display: flex; align-items: flex-end; gap: 32px; flex-wrap: wrap; justify-content: center;">
+      </form>
+      <section class="section" aria-label="Activity Type and Difficulty">
+        <div class="flex-parent" style="gap: 32px; justify-content: center; align-items: flex-end; flex-wrap: wrap;">
           <div>
-            <div class="section-title" style="margin-bottom: 8px;">Activity Type</div>
-            <div class="flex-parent" id="activityTypeButtons" role="group" aria-label="Activity Type Selection" style="margin-bottom: 0;">
-              <!-- Activity Type buttons injected here -->
-            </div>
+            <div class="section-title">Activity Type</div>
+            <div class="flex-parent" id="activityTypeButtons" role="group" aria-label="Activity Type Selection"></div>
           </div>
           <div>
-            <div class="section-title" style="margin-bottom: 8px;">Difficulty</div>
-            <div class="flex-parent" id="difficultyButtons" role="group" aria-label="Difficulty Selection" style="margin-bottom: 0;">
+            <div class="section-title">Difficulty</div>
+            <div class="flex-parent" id="difficultyButtons" role="group" aria-label="Difficulty Selection">
               <button id="difficultyNormalbutton" class="difficulty" type="button" aria-pressed="true">Normal</button>
               <button id="difficultyMasterbutton" class="difficulty" type="button" aria-pressed="false">Master</button>
             </div>
           </div>
         </div>
-      </div>
-      <!-- Queue Command Section -->
-      <div class="queue-section" style="margin-top: 0;">
-        <div class="section-title" style="margin-bottom: 8px;">Queue Command</div>
-        <div id="queueString" class="queue-output" tabindex="0" aria-live="polite" style="margin-bottom: 8px;">!queue</div>
+      </section>
+      <section class="queue-section" aria-label="Queue Command">
+        <div class="section-title">Queue Command</div>
+        <div id="queueString" class="queue-output" tabindex="0" aria-live="polite">!queue</div>
         <button class="copy-btn" type="button" id="copyButton" aria-label="Copy queue command to clipboard">Copy to Clipboard</button>
-      </div>
-    </div>
-
-    <div class="content-grid">
-      <div class="section column">
+      </section>
+    </section>
+    <main class="content-grid">
+      <section class="section column" aria-label="Activity">
         <div class="section-title">Activity</div>
-        <div id="activityButtons" class="column-content" role="group" aria-label="Activity Selection">
-          <!-- Activity buttons injected here -->
-        </div>
-      </div>
-      <div class="section column">
+        <div id="activityButtons" class="column-content" role="group" aria-label="Activity Selection"></div>
+      </section>
+      <section class="section column" aria-label="Encounter">
         <div class="section-title">Encounter</div>
-        <div id="encounterButtons" class="column-content" role="group" aria-label="Encounter Selection">
-          <!-- Encounter buttons injected here -->
-        </div>
-      </div>
-    </div>
-    <!-- Removed duplicate Difficulty and Queue Command sections -->
+        <div id="encounterButtons" class="column-content" role="group" aria-label="Encounter Selection"></div>
+      </section>
+    </main>
   </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden>Copied to clipboard!</div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite">Copied to clipboard!</div>
-
-<!-- Main application script. For production, moved to a separate JS file. -->
-<script src="script.js"></script>
+  <script src="script.js" defer></script>
             "2: Oracles",
             "3: Templar",
             "Post-Templar",
